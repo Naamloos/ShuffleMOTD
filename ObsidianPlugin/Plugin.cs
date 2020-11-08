@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace ObsidianPlugin
 {
-    [Plugin(Name = "ObsidianPlugin", Version = "1.0",
-            Authors = "Naamloos", Description = "A test plugin with nuget.",
-            ProjectUrl = "https://github.com/Naamloos/ObsidianPlugin")]
+    [Plugin(Name = "ShuffleMOTD", Version = "1.0",
+            Authors = "Naamloos", Description = "Shuffles the MOTD",
+            ProjectUrl = "https://github.com/Naamloos/ShuffleMOTD")]
     public class Plugin : PluginBase
     {
         // Any interface from Obsidian.Plugins.Services can be injected into properties
