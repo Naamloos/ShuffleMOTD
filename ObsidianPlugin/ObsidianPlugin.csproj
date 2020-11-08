@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Obsidian.API" Version="1.0.198" ExcludeAssets="runtime">
 		<Private>false</Private>
 	</PackageReference>
