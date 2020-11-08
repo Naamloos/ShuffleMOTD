@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>ShuffleMOTD</AssemblyName>
+    <RootNamespace>ShuffleMOTD</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -9,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Obsidian.API" Version="1.0.173" ExcludeAssets="runtime">
+    <PackageReference Include="Obsidian.API" Version="1.0.198" ExcludeAssets="runtime">
 		<Private>false</Private>
 	</PackageReference>
   </ItemGroup>
