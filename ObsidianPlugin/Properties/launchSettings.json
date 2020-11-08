@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ObsidianPlugin": {
+      "commandName": "Executable",
+      "executablePath": "ServerFiles\\Obsidian.exe",
+      "workingDirectory": "ServerFiles\\"
+    }
+  }
+}
