@@ -1,43 +1,19 @@
-# ObsidianPlugin
-A Template Repository for building [Obsidian](https://github.com/Naamloos/Obsidian) plugins. Make sure to rename the assemblies to ensure compatibility with other plugins.
+# ShuffleMOTD
+A simple Obsidian plugin that shuffles your MOTD
 
-## Obsidian.Api.dll reference
-You need the Obsidian.API dll to be able to develop plugins. This template repository has the myget feed pre-setup.
-1. Add Obsidian.Api to your references.
-2. Open your `.csproj` file.
-3. Find the reference to `Obsidian.Api`.
-4. Add the following node as a child to that property: `<Private>false</Private>`.
-
-## Myget reference
-Instead of directly referencing the DLL we can also pull it from myget for a quick streamlined dev environment. This template repository has the package reference set up for you, so you only need to add the package source.
-1. Add `https://www.myget.org/F/obsidian/api/v3/index.json` to your Package sources.
-2. Search for `Obsidian.Api` on Nuget.
-3. Install the latest version.
-4. Open your `.csproj` file.
-5. Make sure the package reference looks like this:
+## Config format
+On first run, ShuffleMOTD will generate a new config file named `motd.json`. It looks like this:
+```json
+{
+	"MOTDs":
+	[
+		"Hi!",
+		"Nice meme!",
+	],
+	
+	"Format" : "Sample format! {0} is the motd"
+}
 ```
-<PackageReference Include="Obsidian.API" Version="1.0.110" ExcludeAssets="runtime">
-  <Private>false</Private>
-</PackageReference>
-```
-What's important here is that you include the `ExcludeAssets` parameter and the `Private` node. This will make sure Obsidian will use it's own Obsidian.Api assembly.
+Use `Format` to set your MOTD format. Set it to `{0}` to shuffle the whole MOTD.
 
-### Myget on CI?
-Use the following two pre-build commands:
-```
-nuget sources add -Name Obsidian-Myget -Source https://www.myget.org/F/obsidian/api/v3/index.json
-nuget restore
-```
-
-## Debugging Plugins
-**To debug this template repository, all you have to do is add your Obsidian server files to the ServerFiles folder.**
-
-1. Go to your project properties.
-2. Go to the Debug tab.
-3. Set `Launch:` to Executable.
-4. Click `Browse...` next to `Executable:` and find Obsidian.exe.
-5. Click `Browse...` next to `Working Directory:` and select the folder that `Obsidian.exe` was in.
-5. Go to the `Build` tab.
-6. Click `Browse...` after `Output Path`.
-7. Select your `plugins` folder.
-8. Click the debug button to start debugging your plugin. You can now easily set breakpoints.
+Use `MOTDs` to set your random MOTDs.
