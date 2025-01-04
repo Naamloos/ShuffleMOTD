@@ -31,14 +31,18 @@ jobs:
       run: dotnet publish --configuration Release
       working-directory: ShuffleMOTD
 
+    - name: Get short SHA
+      id: vars
+      run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ github.sha::7 }}
-        release_name: ShuffleMOTD ${{ github.sha::7 }}
+        tag_name: v${{ env.SHORT_SHA }}
+        release_name: ShuffleMOTD ${{ env.SHORT_SHA }}
         draft: false
         prerelease: false
 
