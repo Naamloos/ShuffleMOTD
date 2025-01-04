@@ -31,8 +31,23 @@ jobs:
       run: dotnet publish --configuration Release
       working-directory: ShuffleMOTD
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: ShuffleMOTD
-        path: ShuffleMOTD/bin/Release/ShuffleMOTD.obby
+        tag_name: v${{ github.run_number }}
+        release_name: Release ${{ github.run_number }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ShuffleMOTD/bin/Release/ShuffleMOTD.obby
+        asset_name: ShuffleMOTD.obby
+        asset_content_type: application/octet-stream
