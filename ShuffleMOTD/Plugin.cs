@@ -1,54 +1,59 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Obsidian.API;
 using Obsidian.API.Events;
 using Obsidian.API.Plugins;
-using Obsidian.API.Plugins.Services;
-using Obsidian.CommandFramework.Attributes;
-using Obsidian.CommandFramework.Entities;
 using System;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ShuffleMOTD
 {
-    [Plugin(Name = "ShuffleMOTD", Version = "1.0",
-            Authors = "Naamloos", Description = "Shuffles the MOTD",
-            ProjectUrl = "https://github.com/Naamloos/ShuffleMOTD")]
-    public class Plugin : PluginBase
+    public sealed class Plugin : PluginBase
     {
-        // Any interface from Obsidian.Plugins.Services can be injected into properties
-        [Inject] public ILogger Logger { get; set; }
-        [Inject] public IFileReader FileReader { get; set; }
-        [Inject] public IFileWriter FileWriter { get; set; }
+        [Inject] 
+        public ILogger Logger { get; set; }
 
-        MotdCollection motds;
+        public MotdCollection motds;
 
-        // One of server messages, called when an event occurs
-        public async Task OnLoad(IServer server)
+        public override async ValueTask OnLoadedAsync(IServer server)
         {
-            Logger.Log($"Loaded {Info.Name}.");
+            var file = File.Open("motd.json", FileMode.OpenOrCreate);
 
-            if (!FileWriter.FileExists("motd.json"))
+            if (file.Length < 1)
             {
-                FileWriter.CreateFile("motd.json");
-
-                await FileWriter.WriteAllTextAsync("motd.json", JsonConvert.SerializeObject(new MotdCollection()));
-                Logger.Log($"Created new motds.json. Please edit this file and restart the server.");
+                await JsonSerializer.SerializeAsync(file, new MotdCollection());
+                await file.FlushAsync();
+                file.Position = 0;
+                Logger.LogInformation($"Created new motd.json. Please edit this file and restart the server.");
             }
 
-            motds = JsonConvert.DeserializeObject<MotdCollection>(FileReader.ReadAllText("motd.json"));
-
-            await Task.CompletedTask;
+            motds = await JsonSerializer.DeserializeAsync<MotdCollection>(file);
         }
 
-        public async Task OnServerStatusRequest(ServerStatusRequestEventArgs args)
+        public override void ConfigureRegistry(IPluginRegistry pluginRegistry)
+        {
+            pluginRegistry.MapEvent(OnServerStatusRequest, Priority.Critical);
+        }
+
+        public void OnServerStatusRequest(ServerStatusRequestEventArgs args)
         {
             if (motds.Motds.Length < 1)
                 return;
 
-            var motd = string.Format(motds.Format, motds.Motds[new Random().Next(0, motds.Motds.Length)]);
-
+            var motd = string.Format(motds.Format, motds.Motds[Random.Shared.Next(0, motds.Motds.Length)]);
             args.Status.Description.Text = motd;
-            await Task.CompletedTask;
         }
+    }
+
+    public class MotdCollection
+    {
+        [JsonPropertyName("motds")]
+        public string[] Motds = [];
+
+        [JsonPropertyName("format")]
+        public string Format = "{0} is the current MOTD.";
     }
 }

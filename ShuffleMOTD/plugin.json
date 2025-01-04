@@ -1,0 +1,10 @@
+{
+  "name": "ShuffleMOTD",
+  "id": "shufflemotd",
+  "version": "2.0.0",
+  "authors": [
+    "ObsidianMC Contributors"
+  ],
+  "description": "Shuffles your MOTD according to a configuration file.",
+  "projectUrl": "https://github.com/ObsidianMC/ShuffleMOTD"
+}
