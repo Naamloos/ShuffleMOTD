@@ -41,8 +41,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ env.SHORT_SHA }}
-        release_name: ShuffleMOTD ${{ env.SHORT_SHA }}
+        tag_name: ${{ github.run_number }}
+        release_name: ShuffleMOTD - ${{ github.event.head_commit.message }}
         draft: false
         prerelease: false
 
