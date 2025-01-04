@@ -1,36 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <AssemblyName>ShuffleMOTD</AssemblyName>
-    <RootNamespace>ShuffleMOTD</RootNamespace>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<PreserveCompilationContext>false</PreserveCompilationContext>
+		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+		<OutputType>Library</OutputType>
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<EnableDynamicLoading>true</EnableDynamicLoading>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 
+		<PluginAssembly>ShuffleMOTD</PluginAssembly>
+		<PluginVersion>2.0.0.0</PluginVersion>
+		<PluginApiVersion>1.0.0</PluginApiVersion>
+		<PluginPublishDir>bin/$(Configuration)/</PluginPublishDir>
+	</PropertyGroup>
 
-	  <PluginAssembly>ShuffleMOTD</PluginAssembly>
-	  <PluginVersion>2.0.0.0</PluginVersion>
-	  <PluginApiVersion>1.0.0</PluginApiVersion>
-	  <PluginPublishDir>bin/$(Configuration)/</PluginPublishDir>
-  </PropertyGroup>
+	<PropertyGroup>
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>ServerFiles\Server-0\plugins\</OutputPath>
-  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Obsidian.API" Version="1.0.0-nightly-47" ExcludeAssets="runtime">
+			<Private>false</Private>
+		</PackageReference>
+		<PackageReference Include="Obsidian.MSBuild" Version="1.0.3-nightly.g4737df362d" />
+	</ItemGroup>
 
-    <PropertyGroup>
-	    <EnablePreviewFeatures>true</EnablePreviewFeatures>
-    </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Obsidian.API" Version="1.0.0-nightly-47" ExcludeAssets="runtime">
-		<Private>false</Private>
-	</PackageReference>
-    <PackageReference Include="Obsidian.MSBuild" Version="1.0.3-nightly.g4737df362d" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="plugin.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="plugin.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>
