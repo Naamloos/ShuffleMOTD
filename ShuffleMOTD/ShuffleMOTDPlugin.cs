@@ -43,39 +43,6 @@ namespace ShuffleMOTD
             LoadedMotdCollection = await JsonSerializer.DeserializeAsync<MotdCollection>(file) ?? new MotdCollection();
             file.Position = 0;
             await SerializeMotdAsync(LoadedMotdCollection, file);
-
-            InitializeFileWatcher();
-        }
-
-        private void InitializeFileWatcher()
-        {
-            _fileWatcher = new FileSystemWatcher
-            {
-                Path = AppDomain.CurrentDomain.BaseDirectory,
-                Filter = MOTD_FILE,
-                NotifyFilter = NotifyFilters.LastWrite
-            };
-
-            _fileWatcher.Changed += async (sender, e) => await OnMotdFileChangedAsync();
-            _fileWatcher.EnableRaisingEvents = true;
-        }
-
-        private async Task OnMotdFileChangedAsync()
-        {
-            await _semaphore.WaitAsync();
-            try
-            {
-                await using var file = File.Open(MOTD_FILE, FileMode.Open);
-                LoadedMotdCollection = await JsonSerializer.DeserializeAsync<MotdCollection>(file) ?? LoadedMotdCollection;
-            }
-            catch (JsonException ex)
-            {
-                Logger.LogError(ex, "Failed to deserialize motd.json. Ignoring changes.");
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
         }
 
         private static async ValueTask SerializeMotdAsync(MotdCollection motdCollection, FileStream file)
