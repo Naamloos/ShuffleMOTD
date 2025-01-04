@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "ObsidianPlugin": {
-      "commandName": "Executable",
-      "executablePath": "D:\\Git Repos\\ShuffleMOTD\\ObsidianPlugin\\ServerFiles\\Obsidian.exe",
-      "workingDirectory": "D:\\Git Repos\\ShuffleMOTD\\ObsidianPlugin\\ServerFiles\\"
-    }
-  }
-}

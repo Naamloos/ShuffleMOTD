@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ShuffleMOTD
@@ -14,37 +15,74 @@ namespace ShuffleMOTD
     public sealed class ShuffleMOTDPlugin : PluginBase
     {
         private const string MOTD_FILE = "motd.json";
+        private const string PLEASE_EDIT = "Please edit motd.json.";
+        private const string CREATED_NEW_MOTD = "Created new motd.json. Edit this file to set your MOTD. These changes are adapted in real-time.";
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            WriteIndented = true
+        };
+        private FileSystemWatcher _fileWatcher;
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-        [Inject] 
+        [Inject]
         public ILogger<ShuffleMOTDPlugin> Logger { get; set; }
 
-        public MotdCollection LoadedMotdCollection;
+        public MotdCollection LoadedMotdCollection { get; private set; }
 
         public override async ValueTask OnLoadedAsync(IServer server)
         {
-            var file = File.Open(MOTD_FILE, FileMode.OpenOrCreate);
+            await using var file = File.Open(MOTD_FILE, FileMode.OpenOrCreate);
 
-            if (file.Length < 1)
+            if (file.Length == 0)
             {
-                await JsonSerializer.SerializeAsync(file, new MotdCollection(), options: new JsonSerializerOptions()
-                {
-                    WriteIndented = true,
-                    IndentSize = 4
-                });
-                await file.FlushAsync();
-                file.Position = 0;
-                Logger.LogInformation($"Created new motd.json. Please edit this file and restart the server.");
+                await SerializeMotdAsync(new MotdCollection(), file);
+                Logger.LogInformation(CREATED_NEW_MOTD);
             }
 
-            LoadedMotdCollection = await JsonSerializer.DeserializeAsync<MotdCollection>(file);
             file.Position = 0;
-            await JsonSerializer.SerializeAsync(file, LoadedMotdCollection, options: new JsonSerializerOptions()
-            {
-                WriteIndented = true,
-                IndentSize = 4
-            });
+            LoadedMotdCollection = await JsonSerializer.DeserializeAsync<MotdCollection>(file) ?? new MotdCollection();
+            file.Position = 0;
+            await SerializeMotdAsync(LoadedMotdCollection, file);
 
-            await file.DisposeAsync();
+            InitializeFileWatcher();
+        }
+
+        private void InitializeFileWatcher()
+        {
+            _fileWatcher = new FileSystemWatcher
+            {
+                Path = AppDomain.CurrentDomain.BaseDirectory,
+                Filter = MOTD_FILE,
+                NotifyFilter = NotifyFilters.LastWrite
+            };
+
+            _fileWatcher.Changed += async (sender, e) => await OnMotdFileChangedAsync();
+            _fileWatcher.EnableRaisingEvents = true;
+        }
+
+        private async Task OnMotdFileChangedAsync()
+        {
+            await _semaphore.WaitAsync();
+            try
+            {
+                await using var file = File.Open(MOTD_FILE, FileMode.Open);
+                LoadedMotdCollection = await JsonSerializer.DeserializeAsync<MotdCollection>(file) ?? LoadedMotdCollection;
+            }
+            catch (JsonException ex)
+            {
+                Logger.LogError(ex, "Failed to deserialize motd.json. Ignoring changes.");
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        private static async ValueTask SerializeMotdAsync(MotdCollection motdCollection, FileStream file)
+        {
+            file.Position = 0;
+            await JsonSerializer.SerializeAsync(file, motdCollection, _jsonOptions);
+            await file.FlushAsync();
         }
 
         public override void ConfigureRegistry(IPluginRegistry pluginRegistry)
@@ -52,19 +90,16 @@ namespace ShuffleMOTD
             pluginRegistry.MapEvent(OnServerStatusRequest, Priority.Critical);
         }
 
-        public void OnServerStatusRequest(ServerStatusRequestEventArgs args)
+        private void OnServerStatusRequest(ServerStatusRequestEventArgs args)
         {
-            if (LoadedMotdCollection.Motds.Length < 1)
-                return;
-
-            if (LoadedMotdCollection.Motds[0] == "EDIT ME")
+            if (LoadedMotdCollection.Motds.Length == 0)
             {
-                args.Status.Description.Text = "Please edit motd.json and restart the server.";
+                args.Status.Description.Text = PLEASE_EDIT;
                 return;
             }
 
-            var selection = LoadedMotdCollection.Motds[Random.Shared.Next(0, LoadedMotdCollection.Motds.Length)];
-            var motd = string.IsNullOrWhiteSpace(LoadedMotdCollection.Format)? selection : string.Format(LoadedMotdCollection.Format, selection);
+            var selection = LoadedMotdCollection.Motds[Random.Shared.Next(LoadedMotdCollection.Motds.Length)];
+            var motd = string.IsNullOrWhiteSpace(LoadedMotdCollection.Format) ? selection : string.Format(LoadedMotdCollection.Format, selection);
             args.Status.Description.Text = motd;
         }
     }
@@ -72,11 +107,9 @@ namespace ShuffleMOTD
     public class MotdCollection
     {
         [JsonPropertyName("motds")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-        public string[] Motds { get; set; } = [ "EDIT ME", "SECOND MOTD", "THIRD MOTD... etc etc" ];
+        public string[] Motds { get; set; } = Array.Empty<string>();
 
         [JsonPropertyName("format")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-        public string Format { get; set; } = "{0} is the current MOTD.";
+        public string Format { get; set; } = "{0}";
     }
 }
