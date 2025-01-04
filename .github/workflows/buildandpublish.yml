@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      OBSIDIAN_SIGNING_KEY: ${{ secrets.OBBY_RSA_PRIVATE }}
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -22,20 +25,14 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
       working-directory: ShuffleMOTD
-      env:
-        OBSIDIAN_SIGNING_KEY: ${{ secrets.OBBY_RSA_PRIVATE }}
 
     - name: Build
       run: dotnet build --configuration Release
       working-directory: ShuffleMOTD
-      env:
-        OBSIDIAN_SIGNING_KEY: ${{ secrets.OBBY_RSA_PRIVATE }}
 
     - name: Publish
       run: dotnet publish --configuration Release
       working-directory: ShuffleMOTD
-      env:
-        OBSIDIAN_SIGNING_KEY: ${{ secrets.OBBY_RSA_PRIVATE }}
 
     - name: Get short SHA
       id: vars
