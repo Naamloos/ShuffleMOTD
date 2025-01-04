@@ -14,6 +14,8 @@
 		<PluginVersion>2.0.0.0</PluginVersion>
 		<PluginApiVersion>1.0.0</PluginApiVersion>
 		<PluginPublishDir>bin/$(Configuration)/</PluginPublishDir>
+		<PluginSigningKey Condition=" '$(OBSIDIANSIGNINGKEY)' == '' "></PluginSigningKey>
+		<PluginSigningKey Condition=" '$(OBSIDIANSIGNINGKEY)' != '' ">$(OBSIDIANSIGNINGKEY)</PluginSigningKey>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -24,7 +26,7 @@
 		<PackageReference Include="Obsidian.API" Version="1.0.0-nightly-47" ExcludeAssets="runtime">
 			<Private>false</Private>
 		</PackageReference>
-		<PackageReference Include="Obsidian.MSBuild" Version="1.0.3-nightly.g4737df362d" />
+		<PackageReference Include="Obsidian.MSBuild" Version="1.0.4-nightly.ga9ff499610" />
 	</ItemGroup>
 
 	<ItemGroup>
