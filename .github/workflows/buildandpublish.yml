@@ -21,15 +21,18 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: /ShuffleMOTD
 
     - name: Build
       run: dotnet build --configuration Release
+      working-directory: /ShuffleMOTD
 
     - name: Publish
       run: dotnet publish --configuration Release
+      working-directory: /ShuffleMOTD
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ShuffleMOTD
-        path: bin/Release/ShuffleMOTD.obby
+        path: /ShuffleMOTD/bin/Release/ShuffleMOTD.obby
